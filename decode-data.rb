@@ -3,6 +3,14 @@
 IN = $stdin
 OUT = $stdout
 
+DELIMITER = ' '
+
+WINDOWS_WORD_LENGTH = 2  # bytes
+# https://msdn.microsoft.com/en-us/library/windows/desktop/aa383751%28v=vs.85%29.aspx
+SYSTEMTIME_LENGTH = WINDOWS_WORD_LENGTH * 7
+SYSTEMTIME_UNPACK = 'v7'
+SYSTEMTIME_PRINTF = '%04d-%02d-%02dT%02d:%02d:%02d,%03dZ'
+
 LENGTH_LENGTH = 2
 
 # S0100851-TDO-002, Rev. 1
@@ -10,42 +18,33 @@ DATA_LENGTH = 244
 UNPACK = 'seeeeeeeeeeeeeeebeebeebbbbbbbbbbbebbbseeeeeeeeeeeeeeeeeeeeeee'.
   gsub('x','x4').gsub('e','g').gsub('b','b8b24').gsub('s','nb16')
   # e <=> g; s <=> S, n, v; b <=> B
-SLICE = 0..2000
 ## S0100851-TDO-002, Rev. 0
 # UNPACK = 'sx2e59x4' # s <=> S, n, v; e <=> g
-# SLICE = 0..59
+PRINTF = UNPACK.
+  gsub(/x\d*/, '').gsub(/[eg]/,"#{DELIMITER}%.8e").gsub(/[sSnv]/,"#{DELIMITER}%+6d").gsub(/[bB]\d*/, "#{DELIMITER}%s")
 
-while (length_b = IN.read(LENGTH_LENGTH))
+while (true)
 
+  break unless system_time = IN.read(SYSTEMTIME_LENGTH)
+  OUT.printf(SYSTEMTIME_PRINTF, *system_time.unpack(SYSTEMTIME_UNPACK))
+
+  break unless length_b = IN.read(LENGTH_LENGTH)
   # hex dump
   # OUT.puts length_b.unpack('H*')
   length = length_b.unpack('v').first
 
   data_b = IN.read(length)
-
-  OUT.print Time.now.strftime('%FT%T.%N%z') + ' '
-
   if (DATA_LENGTH == length)
-    OUT.puts data_b.unpack(UNPACK)[SLICE].collect {|val|
-      case val
-      when Float
-        sprintf('%.8e', val)
-      when Integer
-        sprintf('%+6d', val)
-      when String
-        val
-        # val[0]
-        # val[-1]
-      else
-        raise "Unknown type #{val.inspect}"
-      end
-    }.join(' ')
+    OUT.printf(PRINTF, *data_b.unpack(UNPACK))
   else
-    OUT.print length.to_s + ' '
+    OUT.print DELIMITER
+    OUT.print length.to_s
+    OUT.print DELIMITER
     # hex dump
-    OUT.puts data_b.unpack('H*')
+    OUT.print data_b.unpack('H*')
   end
 
+  OUT.puts
   OUT.flush
 end
 
