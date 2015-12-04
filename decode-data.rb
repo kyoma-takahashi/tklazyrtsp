@@ -7,10 +7,10 @@ LENGTH_LENGTH = 2
 
 # S0100851-TDO-002, Rev. 1
 DATA_LENGTH = 244
-UNPACK = 'seeeeeeeeeeeeeeebeebeebbbbbbbbbbbebbbsexxxxxxxxxxxxxxxxxxxxxx'.
+UNPACK = 'seeeeeeeeeeeeeeebeebeebbbbbbbbbbbebbbseeeeeeeeeeeeeeeeeeeeeee'.
   gsub('x','x4').gsub('e','g').gsub('s','nx2').gsub('b','b8x3')
   # e <=> g; s <=> S, n, v; b <=> B
-SLICE = 0..38
+SLICE = 0..59
 ## S0100851-TDO-002, Rev. 0
 # UNPACK = 'sx2e59x4' # s <=> S, n, v; e <=> g
 # SLICE = 0..59
