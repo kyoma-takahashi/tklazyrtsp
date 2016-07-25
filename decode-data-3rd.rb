@@ -21,7 +21,7 @@ UNPACK = 'seeeeeeeeeeeeeeebeebeebbbbbbbbbbbebbbseeeeeeeeeeeeeeeeeeeeeee'.
 ## S0100851-TDO-002, Rev. 0
 # UNPACK = 'sx2e59x4' # s <=> S, n, v; e <=> g
 PRINTF = UNPACK.
-  gsub(/x\d*/, '').gsub(/[eg]/,"#{DELIMITER}%.8e").gsub(/[sSnv]/,"#{DELIMITER}%+6d").gsub(/[bB]\d*/, "#{DELIMITER}%s")
+  gsub(/x\d*/, '').gsub(/[eg]/,"#{DELIMITER}%+.8e").gsub(/[sSnv]/,"#{DELIMITER}%+6d").gsub(/[bB]\d*/, "#{DELIMITER}%s")
 
 def read_contents
   return false unless length_b = IN.read(LENGTH_LENGTH)
@@ -32,7 +32,7 @@ end
 def read_error
   return false unless err_b = read_contents
   OUT.print("#{DELIMITER}:")
-  OUT.printf("%+6d;%10d:" * (err_b.bytesize / 6),
+  OUT.printf("%d;%d:" * (err_b.bytesize / 6),
              *err_b.unpack('s<L<' * (err_b.bytesize / 6)))
   true
 end
@@ -45,6 +45,9 @@ while (true)
   break unless read_error
 
   break unless data_b = read_contents
+
+  break unless read_error
+
   if (DATA_LENGTH == data_b.bytesize)
     OUT.printf(PRINTF, *data_b.unpack(UNPACK))
   else
@@ -52,10 +55,8 @@ while (true)
     OUT.print data_b.bytesize.to_s
     OUT.print DELIMITER
     # hex dump
-    OUT.print data_b.unpack('H*')
+    OUT.print data_b.unpack('H*').first
   end
-
-  break unless read_error
 
   OUT.puts
   OUT.flush
