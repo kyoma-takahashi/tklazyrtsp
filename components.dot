@@ -1,0 +1,94 @@
+digraph {
+
+  graph [
+    // layout = circo
+    // layout = fdp
+    // layput = neato
+    // layput = sfdp
+    // layout = osage
+    // layout = twopi
+    // layout = dot
+    // layput = patchwork
+    // label = "Components and data flow among them. In red: already implemented."
+    // labelloc = t
+    fontname = Helvetica
+    // rankdir = LR
+    rankdir = TB
+  ]
+
+  node [
+    fontname = Helvetica
+    fontsize = 14
+    shape = oval
+    fillcolor = white
+    style = filled
+  ]
+
+  edge [
+    labelfloat = false
+    fontname = Helvetica
+    fontsize = 12
+  ]
+
+  communicator -> source_splitter -> decoder1 [
+    label = "pipe"
+    color = red
+  ]
+
+  source_splitter -> source_feeder [
+    label = "pipe"
+  ]
+
+  decoder1 -> source_dump [
+    label = "redirect"
+    color = red
+  ]
+
+  communicator [
+    color = red
+  ]
+
+  source_splitter [
+    label = tee
+  ]
+
+  decoder1 [
+    color = red
+    label = decoder
+  ]
+
+  source_dump [
+    shape = note
+    color = red
+  ]
+
+  source_receptor -> decoder2 -> calculator -> results_splitter -> results_feeder [
+    label = "pipe"
+  ]
+
+  results_splitter -> results_dump [
+    label = "redirect"
+  ]
+
+  decoder2 [
+    color = red
+    label = decoder
+  ]
+
+  results_splitter [
+    label = tee
+  ]
+
+  results_dump [
+    shape = note
+  ]
+
+  results_feeder -> communicator [
+    label = "socket"
+    weight = 1
+  ]
+
+  source_feeder -> source_receptor [
+    label = "socket"
+  ]
+}

@@ -1,0 +1,44 @@
+On cmd on Communication host,
+
+(communicator <results_feeder URL> | tee.exe log) 3>&2 2>&1 1>&3 \
+| tee2process.rb "source_feeder <source_receptor address and port>" \
+| decoder \
+> source_dump 2> log
+
+tee.exe is in msys. Alternative: tee.bat in http://stackoverflow.com/questions/10711839/using-a-custom-tee-command-for-bat-file/10719322#10719322
+tee2process.rb "..." cannot be replaced by bash -c "tee >(source_feeder ...)"
+
+On cmd on Calculation host,
+
+source_receptor <listen port> <source_feeder address> \
+| decoder \
+| calculator \
+| tee2process.rb "results_feeder <listen port>" \
+> results_dump 2> log
+
+tee2process.rb "..." cannot be replaced by tee >(results_feeder ...) even on msys.
+bash: cannot make pipe for process substitution: Function not implemented
+
+--
+
+To feed results to communicator, there are some alternative
+implementations. It depends on communicator capability and
+performance.
+
+Alternatively,
+
+  Communication: communicator <listen port> <results_feeder address>
+    Calculation: results_feeder <communicator address and port>
+
+Or,
+
+  Communication: results_retriever <feeder URL> <results file path>
+  Communication: communicator <results file path>
+
+--
+
+Additionally,
+    Calculation: order_receptor <listen port> <orderer address> <order file path>
+    Calculation: calculator <order file path>
+
+--
