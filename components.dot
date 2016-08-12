@@ -9,7 +9,7 @@ digraph {
     // layout = twopi
     // layout = dot
     // layput = patchwork
-    // label = "Components and data flow among them. In red: already implemented."
+    // label = "Components and data flow among them. In red: already implemented. No frame: out of scope."
     // labelloc = t
     fontname = Helvetica
     // rankdir = LR
@@ -30,65 +30,164 @@ digraph {
     fontsize = 12
   ]
 
-  communicator -> source_splitter -> decoder1 [
-    label = "pipe"
-    color = red
-  ]
+  subgraph cluster_communicator {
 
-  source_splitter -> source_feeder [
-    label = "pipe"
-  ]
+    communicator -> source_splitter -> decoder1 [
+      label = pipe
+      color = red
+    ]
 
-  decoder1 -> source_dump [
-    label = "redirect"
-    color = red
-  ]
+    source_splitter -> source_feeder [
+      label = pipe
+    ]
 
-  communicator [
-    color = red
-  ]
+    decoder1 -> source_dump [
+      label = redirect
+      color = red
+    ]
 
-  source_splitter [
-    label = tee
-  ]
+    results_receptor -> results_cacher [
+      label = pipe
+    ]
 
-  decoder1 [
-    color = red
-    label = decoder
-  ]
+    results_cacher -> results_cache [
+      label = file_open
+    ]
 
-  source_dump [
-    shape = note
-    color = red
-  ]
+    results_cache -> communicator [
+      label = file_open
+    ]
 
-  source_receptor -> decoder2 -> calculator -> results_splitter -> results_feeder [
-    label = "pipe"
-  ]
+    communicator [
+      color = red
+    ]
 
-  results_splitter -> results_dump [
-    label = "redirect"
-  ]
+    source_splitter [
+      label = splitter
+    ]
 
-  decoder2 [
-    color = red
-    label = decoder
-  ]
+    decoder1 [
+      color = red
+      label = decoder
+    ]
 
-  results_splitter [
-    label = tee
-  ]
+    source_dump [
+      shape = note
+      color = red
+    ]
 
-  results_dump [
-    shape = note
-  ]
+    source_feeder [
+      label = feeder
+    ]
 
-  results_feeder -> communicator [
-    label = "socket"
+    results_receptor [
+      label = receptor
+    ]
+
+    results_cacher [
+      label = cacher
+    ]
+
+    results_cache [
+      shape = note
+    ]
+
+    {rank = same; source_splitter; source_feeder;}
+
+  }
+
+  subgraph cluster_calculator {
+
+    source_receptor -> decoder2 -> calculation_coordinator -> results_splitter -> results_summariser ->results_feeder [
+      label = pipe
+    ]
+
+    calculation_coordinator -> calculators [
+      dir = both
+    ]
+
+    results_splitter -> results_dump [
+      label = redirect
+    ]
+
+    results_splitter -> results_publisher [
+      label = pipe
+    ]
+
+    results_publisher -> results_shared [
+      label = file_open
+    ]
+
+    source_receptor [
+      label = receptor
+    ]
+
+    decoder2 [
+      color = red
+      label = decoder
+    ]
+
+    calculation_coordinator [
+      label = coordinator
+    ]
+
+    calculators [
+      shape = plaintext
+    ]
+
+    results_splitter [
+      label = splitter
+    ]
+
+    results_dump [
+      shape = note
+    ]
+
+    results_summariser [
+      label = summariser
+    ]
+
+    results_feeder [
+      label = feeder
+    ]
+
+    results_publisher [
+      label = publisher
+    ]
+
+    results_shared [
+      shape = note
+    ]
+
+    {rank = same; calculation_coordinator; calculators;}
+    {rank = same; results_splitter; results_dump;}
+
+  }
+
+  results_feeder -> results_receptor [
+    label = socket
     weight = 1
   ]
 
   source_feeder -> source_receptor [
-    label = "socket"
+    label = socket
+    weight = 1
   ]
+
+  communicator -> DP_slave [
+    dir = both
+    color = red
+  ]
+
+  DP_slave [
+    shape = plaintext
+  ]
+
+  results_shared -> viewer [
+  ]
+
+  viewer [
+    shape = plaintext
+  ]
+
 }

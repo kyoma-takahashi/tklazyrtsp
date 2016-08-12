@@ -1,7 +1,13 @@
 On cmd on Communication host,
 
-(communicator <results_feeder URL> | tee.exe log) 3>&2 2>&1 1>&3 \
-| tee2process.rb "source_feeder <source_receptor address and port>" \
+start \
+results_receptor <listen port> <results_feeder address> \
+| results_cacher <results_temp path> \
+2> log
+
+(communicator <results_temp path> | tee.exe log) 3>&2 2>&1 1>&3 \
+| tee2process.rb \
+"source_feeder <source_receptor address and port>" \
 | decoder \
 > source_dump 2> log
 
@@ -12,8 +18,10 @@ On cmd on Calculation host,
 
 source_receptor <listen port> <source_feeder address> \
 | decoder \
-| calculator \
-| tee2process.rb "results_feeder <listen port>" \
+| calculation_coordinator \
+| tee2process.rb \
+"results_summariser | results_feeder <results_receptor address and port>" \
+"results_publisher <shared file path>" \
 > results_dump 2> log
 
 tee2process.rb "..." cannot be replaced by tee >(results_feeder ...) even on msys.
@@ -21,19 +29,18 @@ bash: cannot make pipe for process substitution: Function not implemented
 
 --
 
-To feed results to communicator, there are some alternative
-implementations. It depends on communicator capability and
-performance.
+To feed results to communicator, there could be some alternative
+implementations, but they are not so good.
 
-Alternatively,
+The followings cannot be implemented since no fork.
 
   Communication: communicator <listen port> <results_feeder address>
     Calculation: results_feeder <communicator address and port>
 
-Or,
+The followings could be time consuming.
 
-  Communication: results_retriever <feeder URL> <results file path>
-  Communication: communicator <results file path>
+    Calculation: results_feeder <listen port> <communicator address>
+  Communication: communicator <results_feeder URL>
 
 --
 
