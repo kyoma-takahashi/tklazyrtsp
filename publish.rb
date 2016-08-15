@@ -15,17 +15,17 @@ JSON_STATE = JSON::state.new({ :indent => ' ' * 2,
                                :max_nesting => false
                              })
 
-latest_results = {}
+latest_results = []
 
 File.open(file_path, 'w') do |file|
 
   while line = $stdin.gets
-    CalculationResults.parse(line.chomp) do |k, v|
-      file.rewind
-      latest_results[k] = v
-      file.puts JSON.generate(latest_results, JSON_STATE)
-      file.flush
-    end
+    result = CalculationResult.parse(line.chomp)
+    latest_results.delete_if {|r| r.same_calc?(result)}
+    latest_results << result
+    file.rewind
+    file.puts JSON.generate(latest_results, JSON_STATE)
+    file.flush
   end
 
 end
