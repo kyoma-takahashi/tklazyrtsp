@@ -29,24 +29,12 @@ def read_contents
   IN.read(length)
 end
 
-def read_error
-  return false unless err_b = read_contents
-  OUT.print("#{DELIMITER}:")
-  OUT.printf("%d;%d:" * (err_b.bytesize / 6),
-             *err_b.unpack('s<L<' * (err_b.bytesize / 6)))
-  true
-end
-
 while (true)
 
   break unless system_time = IN.read(SYSTEMTIME_LENGTH)
   OUT.printf(SYSTEMTIME_PRINTF, *system_time.unpack(SYSTEMTIME_UNPACK))
 
-  break unless read_error
-
   break unless data_b = read_contents
-
-  break unless read_error
 
   if (DATA_LENGTH == data_b.bytesize)
     OUT.printf(PRINTF, *data_b.unpack(UNPACK))
