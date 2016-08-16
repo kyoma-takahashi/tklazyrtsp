@@ -27,6 +27,7 @@ loop do
     b = ' '
     while s.read(1, b)
       $stdout.write(b)
+      $stdout.flush
     end
     Log.log sprintf("%s is gone", s)
     s.close

@@ -19,8 +19,8 @@ module CalculationResult
       return nil
     end
     result = JSON.parse($2)
-    Log.log("Parsed one has key \"finish\" already #{line}") if result[:finish]
-    result[:finish] = $1
+    Log.log("Parsed one has key \"finish\" already #{line}") if result.has_key?('finish')
+    result['finish'] = $1
     result.extend self
     result
   end

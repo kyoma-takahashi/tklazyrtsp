@@ -22,4 +22,5 @@ while line = $stdin.gets
                    r['method'] == 'a method' && r['params'] == nil
                  }.first['result']['a field'] || Flart::NAN].
     pack(PACK)
+  $stdout.flush
 end
