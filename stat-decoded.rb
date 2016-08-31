@@ -1,8 +1,9 @@
 #!/usr/bin/ruby
 
+require 'optparse'
 require 'time'
 
-WITH_ERROR = true
+WITH_ERROR = ARGV.getopts('', 'with-error')['with-error']
 
 LONG_INTERVAL = 1.0
 LINE_LENGTH_WO_ERROR = WITH_ERROR ? 1308..1308 : 1261..1304
@@ -18,6 +19,24 @@ end
 @longest = nil
 @length_counts = {}
 @interval_counts = {}
+
+at_exit do
+  puts "end: #{strftime(@time)}"
+
+  puts "samples incl. those w/ errors: #{@samples}"
+
+  puts 'interval wo/ errors:'
+  puts "  longest: #{@longest} s"
+  @interval_counts.keys.sort.reverse.each do |i|
+    puts "  #{i/INTERVAL_CLASS_FACTOR}--#{(i+1)/INTERVAL_CLASS_FACTOR} s: #{@interval_counts[i]}"
+  end
+  puts "  shortest: #{@shortest} s"
+
+  puts 'line length wo/ errors:'
+  @length_counts.keys.sort.reverse.each do |l|
+    puts "  #{l} chars: #{@length_counts[l]}"
+  end
+end
 
 while(line = gets)
   @samples += 1
@@ -70,20 +89,4 @@ while(line = gets)
     @length_counts[length] += 1
   end
 
-end
-
-puts "end: #{strftime(@time)}"
-
-puts "samples incl. those w/ errors: #{@samples}"
-
-puts 'interval wo/ errors:'
-puts "  longest: #{@longest} s"
-@interval_counts.keys.sort.reverse.each do |i|
-  puts "  #{i/INTERVAL_CLASS_FACTOR}--#{(i+1)/INTERVAL_CLASS_FACTOR} s: #{@interval_counts[i]}"
-end
-puts "  shortest: #{@shortest} s"
-
-puts 'line length wo/ errors:'
-@length_counts.keys.sort.reverse.each do |l|
-  puts "  #{l} chars: #{@length_counts[l]}"
 end
