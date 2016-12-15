@@ -1,30 +1,29 @@
 On cmd on Communication host,
 
 start \
-results_receptor <listen port> <results_feeder address> \
-| results_cacher <results_temp path> \
+ruby tcpserver2stdout.rb <listen port> \
+| ruby cache.rb <results_temp path> \
 2> log
 
 (communicator <results_temp path> | tee.exe log) 3>&2 2>&1 1>&3 \
-| tee2process.rb \
-"source_feeder <source_receptor address and port>" \
-| decoder \
+| ruby tee2process.rb "ruby stdin2tcpsocket.rb <source_receptor address and port>" \
+| ruby decode.rb \
 > source_dump 2> log
 
 tee.exe is in msys. Alternative: tee.bat in http://stackoverflow.com/questions/10711839/using-a-custom-tee-command-for-bat-file/10719322#10719322
-tee2process.rb "..." cannot be replaced by bash -c "tee >(source_feeder ...)"
+ruby tee2process.rb "..." cannot be replaced by bash -c "tee >(ruby stdin2tcpsocket.rb ...)"
 
 On cmd on Calculation host,
 
-source_receptor <listen port> <source_feeder address> \
-| decoder \
-| calculation_coordinator \
-| tee2process.rb \
-"results_summariser | results_feeder <results_receptor address and port>" \
-"results_publisher <shared file path>" \
+ruby tcpserver2stdout.rb <listen port> \
+| ruby decode.rb \
+| ruby calculate.rb \
+| ruby tee2process.rb \
+"ruby summarise.rb | ruby stdin2tcpsocket.rb <results_receptor address and port>" \
+"ruby publish.rb <shared file path>" \
 > results_dump 2> log
 
-tee2process.rb "..." cannot be replaced by tee >(results_feeder ...) even on msys.
+ruby tee2process.rb "..." cannot be replaced by tee >(results_feeder ...) even on msys.
 bash: cannot make pipe for process substitution: Function not implemented
 
 --
@@ -44,7 +43,7 @@ The followings could be time consuming.
 
 --
 
-Additionally,
+Optionally in addition,
     Calculation: order_receptor <listen port> <orderer address> <order file path>
     Calculation: calculator <order file path>
 

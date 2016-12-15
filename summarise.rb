@@ -15,12 +15,12 @@ while line = $stdin.gets
   latest_results.delete_if {|r| r.same_calc?(result)}
   latest_results << result
   # this is just an example
-  $stdout.write [latest_results.select {|r|
-                   r['method'] == 'a method' && r['params'] == nil
-                 }.first['result']['a field'] || Flart::NAN,
-                 latest_results.select {|r|
-                   r['method'] == 'a method' && r['params'] == nil
-                 }.first['result']['a field'] || Flart::NAN].
-    pack(PACK)
+  $stdout.write (latest_results.select {|r|
+                   'sng' == r['method'] && nil == r['params']
+                 }.first['result'][0][1, 2] + Array.new(2)).
+    collect {|v|
+      v ? v.to_f : Float::NAN
+    }.
+    flatten.pack(PACK)
   $stdout.flush
 end

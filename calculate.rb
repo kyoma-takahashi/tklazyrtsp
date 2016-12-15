@@ -1,5 +1,66 @@
 #!/usr/bin/ruby
 
+=begin
+
+This reads data from the standard input, calls some external
+program(s), and writes the calculation results to the standard
+output. The contents are defined as the followings.
+
+Output format:
+
+    DOMESTICS RESULT
+
+      Delimited by one or more space characters. Note that RESULT may
+      contain space characters.
+
+      The first field is when the calculation was finished according
+      to the local clock.
+
+  TIMESTAMP
+
+    %FT%T,%N%z
+
+  RESULT
+
+    A JSON object.
+    UTF-8 encoded.
+    No CR or LF.
+
+    The root JSON object must have the following keys.
+      "method". Its value is a string indicating the calculation
+        method.
+      "result". Of the calculation.
+    The root JSON object must not have the following key.
+      "finish". It has to be given as TIMESTAMP outside the JSON
+        object.
+    The root JSON object may have the following keys.
+      "params". Conditions of the calculation.
+      "sample". Its value is a JSON object describing the data to be
+        calculated.
+
+    The "sample" JSON object may have the following keys.
+      "begin". The date and time of the former end of the sample
+        data, in %FT%T,%N%z
+      "end". The date and time of the latter end of the sample
+        data, in %FT%T,%N%z
+
+=end
+
+# The followings are just an example implementation.
+#
+# This calls a external program giving a CSV file with a fixed name in a
+# specified directory.
+#
+# The CSV file does not have the header row. The first column in the CSV
+# file contains time [s] in the float format. The subsequent columns have
+# the specified parameters. The time is 0 [s] in the first row. The time
+# interval is not constant. The CSV file contains data no shorter than a
+# specified time length.
+#
+# The external program writes another CSV file with a fixed name in a
+# specified directory, and this reads it. The CSV file does not have any
+# columns of time but each row is for a time 0, 1, 2, ... [s].
+
 require 'time'
 require 'tempfile'
 require 'csv'
@@ -11,7 +72,7 @@ IN_VALUES_AT = {:sng => [1, 11, 14, 15].collect {|i| i + 1}}
 IN_DELIMITER = ' '
 IN_STRPTIME = '%Y-%m-%dT%H:%M:%S,%N%z'
 
-OUT_STRFTIME = IN_STRPTIME
+OUT_STRFTIME = '%Y-%m-%dT%H:%M:%S,%3N%z'
 OUT_DELIMITER = ' '
 OUT_JSON_STATE = JSON::State.new({ :indent => '',
                                    :space => '',
@@ -160,64 +221,3 @@ sng_calc.start_cmd
 until sng_calc.wait_cmd()
   Thread.pass
 end
-
-
-=begin
-
-This reads data from the standard input.
-
-This calls a external program giving a CSV file with a fixed name in a
-specified directory.
-
-The CSV file does not have the header row. The first column in the CSV
-file contains time [s] in the float format. The subsequent columns have
-the specified parameters. The time is 0 [s] in the first row. The time
-interval is not constant. The CSV file contains data no shorter than a
-specified time length.
-
-The external program writes another CSV file with a fixed name in a
-specified directory, and this reads it. The CSV file does not have any
-columns of time but each row is for a time 0, 1, 2, ... [s].
-
-This writes the calculation results to the standard output. The
-contents are defined as the followings.
-
-Output format:
-
-    TIMESTAMP RESULT
-
-      Delimited by one or more space characters. Note that RESULT may
-      contain space characters.
-
-      The first field is when the calculation was finished according
-      to the local clock.
-
-  TIMESTAMP
-
-    %FT%T,%N%z
-
-  RESULT
-
-    A JSON object.
-    UTF-8 encoded.
-    No CR or LF.
-
-    The root JSON object must have the following keys.
-      "method". Its value is a string indicating the calculation
-        method.
-      "result". Of the calculation.
-    The root JSON object must not have the following key.
-      "finish". It has to be given as TIMESTAMP outside the JSON
-        object.
-    The root JSON object may have the following keys.
-      "params". Conditions of the calculation.
-      "sample". Its value is a JSON object describing the data to be
-        calculated.
-
-    The "sample" JSON object may have the following keys.
-      "begin". The date and time of the former end of the sample
-        data, in %FT%T,%N%z
-      "end". The date and time of the latter end of the sample
-        data, in %FT%T,%N%z
-
-=end

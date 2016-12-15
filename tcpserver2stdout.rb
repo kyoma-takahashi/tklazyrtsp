@@ -2,7 +2,7 @@
 
 require './log.rb'
 
-port, client = *ARGV
+port, host = *ARGV
 
 at_exit do
   Log.log "Exitting #{$0}"
@@ -12,7 +12,7 @@ end
 
 require 'socket'
 
-server = TCPServer.open(client, port)
+server = TCPServer.open(host, port)
 
 addr = server.addr
 addr.shift
