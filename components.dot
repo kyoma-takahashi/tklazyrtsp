@@ -9,7 +9,7 @@ digraph {
     // layout = twopi
     // layout = dot
     // layput = patchwork
-    // label = "Components and data flow among them. In red: already implemented. No frame: out of scope."
+    // label = "Components and data flow among them. In red: not implemented yet at all. No frame: out of scope."
     // labelloc = t
     fontname = Helvetica
     // rankdir = LR
@@ -34,7 +34,6 @@ digraph {
 
     communicator -> source_splitter -> decoder1 [
       label = pipe
-      color = red
     ]
 
     source_splitter -> source_feeder [
@@ -43,7 +42,6 @@ digraph {
 
     decoder1 -> source_dump [
       label = redirect
-      color = red
     ]
 
     results_receptor -> results_cacher [
@@ -56,10 +54,10 @@ digraph {
 
     results_cache -> communicator [
       label = file_open
+      color = red
     ]
 
     communicator [
-      color = red
     ]
 
     source_splitter [
@@ -67,13 +65,11 @@ digraph {
     ]
 
     decoder1 [
-      color = red
       label = decoder
     ]
 
     source_dump [
       shape = note
-      color = red
     ]
 
     source_feeder [
@@ -123,7 +119,6 @@ digraph {
     ]
 
     decoder2 [
-      color = red
       label = decoder
     ]
 
@@ -176,7 +171,6 @@ digraph {
 
   communicator -> DP_slave [
     dir = both
-    color = red
   ]
 
   DP_slave [
