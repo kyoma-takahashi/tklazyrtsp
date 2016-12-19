@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+require './log.rb'
+
 processes = ARGV
 if processes.empty?
   abort "Usage #{$0} process [...]"
@@ -16,7 +18,12 @@ until $stdin.eof?
   s = $stdin.read(1)
   $stdout.write(s)
   process_ios.each do |p|
-    p.write(s)
+    begin
+      p.write(s)
+    rescue Errno::EPIPE
+      Log.log("Broken pipe #{p}")
+      process_ios.delete(p)
+    end
   end
 end
 
