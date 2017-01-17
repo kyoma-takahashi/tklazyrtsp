@@ -65,7 +65,7 @@ require 'time'
 require 'tempfile'
 require 'csv'
 require 'json'
-require './log.rb'
+require 'logger'
 
 IN_VALUES_AT = {:sng => [1, 11, 14, 15].collect {|i| i + 1}}
 
@@ -84,6 +84,10 @@ OUT_JSON_STATE = JSON::State.new({ :indent => '',
                                    :max_nesting => false
                                  })
 
+LOG = Logger.new($stderr)
+LOG.level = Logger::DEBUG
+LOG.progname = $0
+
 
 class Calculator
 
@@ -95,7 +99,7 @@ class Calculator
     @time_afer_beginning = nil
     @tmpfile2cmd = Tempfile.new([self.class.name, 'csv'])
     @csv2cmd = CSV.new(@tmpfile2cmd)
-    Log.log('Made a tempfile to prepare data to an external command')
+    LOG.info('Made a tempfile to prepare data to an external command')
   end
 
   def initialize
@@ -122,7 +126,7 @@ class Calculator
     before_cmd()
     @tmpfile2cmd.close
     @calculator_pid = spawn(*@cmd_arg_opt)
-    Log.log("Started #{@cmd_arg_opt}")
+    LOG.info("Started #{@cmd_arg_opt}")
     @results_out = {
       'method' => @method,
       'sample' => {
@@ -148,7 +152,7 @@ class Calculator
     abort unless status.pid == @calculator_pid
     @calculator_pid = nil
     if status.success? and cmd_success?()
-      Log.log("Finished #{@cmd_arg_opt}")
+      LOG.info("Finished #{@cmd_arg_opt}")
       $stdout.print Time.now.strftime(OUT_STRFTIME)
       $stdout.print OUT_DELIMITER
       after_cmd()
@@ -156,7 +160,7 @@ class Calculator
       $stdout.puts
       $stdout.flush
     else
-      Log.log("Failed in #{@cmd_arg_opt}")
+      LOG.warn("Failed in #{@cmd_arg_opt}")
     end
     return true
   end
@@ -179,7 +183,7 @@ class SngCalculator < Calculator
 
   def before_cmd
     File.rename(@tmpfile2cmd.path, FILE_TO_CMD)
-    Log.log("Moved to #{FILE_TO_CMD} from a tempfile")
+    LOG.info("Moved to #{FILE_TO_CMD} from a tempfile")
   end
 
   def cmd_success?
@@ -193,9 +197,9 @@ class SngCalculator < Calculator
       @results_out['result'] << [(@datetime_begin_calc + t).strftime(OUT_STRFTIME), *row]
       t += FILE_FROM_CMD_TIME_INCREMENT
     end
-    Log.log("Finished reading #{FILE_FROM_CMD}")
+    LOG.info("Finished reading #{FILE_FROM_CMD}")
     File.delete(FILE_FROM_CMD)
-    Log.log("Deleted #{FILE_FROM_CMD}")
+    LOG.info("Deleted #{FILE_FROM_CMD}")
   end
 end
 
@@ -208,7 +212,7 @@ while(line = $stdin.gets)
   sng_calc << [record_time, *record.values_at(*IN_VALUES_AT[:sng])]
 end
 
-Log.log('The standard input reached to EOF')
+LOG.info('The standard input reached to EOF')
 
 until sng_calc.wait_cmd()
   Thread.pass

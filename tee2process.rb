@@ -1,6 +1,10 @@
 #!/usr/bin/ruby
 
-require './log.rb'
+require 'logger'
+
+log = Logger.new($stderr)
+log.level = Logger::DEBUG
+log.progname = $0
 
 processes = ARGV
 if processes.empty?
@@ -21,7 +25,7 @@ until $stdin.eof?
     begin
       p.write(s)
     rescue Errno::EPIPE
-      Log.log("Broken pipe #{p}")
+      log.warn("Broken pipe #{p}")
       process_ios.delete(p)
     end
   end

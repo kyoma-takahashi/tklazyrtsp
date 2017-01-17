@@ -1,11 +1,15 @@
 #!/usr/bin/ruby
 
 require 'json'
-require './log.rb'
+require 'logger'
 
 module CalculationResult
 
   CALC_IDS = ['method', 'params']
+
+  LOG = Logger.new($stderr)
+  LOG.level = Logger::DEBUG
+  LOG.progname = $0
 
   def same_calc?(r)
     r.values_at(*CALC_IDS) == self.values_at(*CALC_IDS)
@@ -15,11 +19,11 @@ module CalculationResult
 
   def self.parse(line)
     unless line =~ PATTERN
-      Log.log("Unknown format #{line}")
+      LOG.warn("Unknown format #{line}")
       return nil
     end
     result = JSON.parse($2)
-    Log.log("Parsed one has key \"finish\" already #{line}") if result.has_key?('finish')
+    LOG.warn("Parsed one has key \"finish\" already #{line}") if result.has_key?('finish')
     result['finish'] = $1
     result.extend self
     result

@@ -1,6 +1,10 @@
 #!/usr/bin/ruby
 
-require './log.rb'
+require 'logger'
+
+log = Logger.new($stderr)
+log.level = Logger::DEBUG
+log.progname = $0
 
 host, port = *ARGV
 
@@ -8,7 +12,7 @@ require 'socket'
 
 server = TCPSocket.open(host, port)
 server.binmode
-Log.log "Sendig to #{server.inspect}"
+log.info("Sendig to #{server.inspect}")
 
 buffer = ' '
 
@@ -20,4 +24,4 @@ end
 
 server.close
 
-Log.log "Exitting #{$0}"
+log.info("Exitting #{$0}")
